@@ -1,0 +1,41 @@
+import React, {Component} from 'react'
+import {bubbleSort} from './Algorithms'
+export default class SortingVisualizer extends Component{
+    constructor(){
+        super()
+        this.state = {
+            array :[],
+        };
+    }
+    componentDidMount(){
+        this.resetArray();
+    }
+    resetArray(){
+        var array = Array.from({length: 200}, () => randomIntFromInterval(10,1000))
+        this.setState({array})
+    }
+
+    render(){
+        const {array} = this.state;
+        return(<div>
+                <button onClick={() =>this.resetArray()}>Generate new array</button>
+                <button onClick={() =>this.doBubbleSort(array)}>Bubble Sort</button>
+                 <div className='container'>
+                {array.map((value, idx) =>(
+                    <div className='bar' key={idx} style={{height: `calc((100vh - ${value/10}vh)*0.75)`}}>
+                         
+                    </div>
+                ))}
+            </div>
+            </div>
+        )
+    }
+    doBubbleSort(arr){
+        this.setState({array: bubbleSort(arr)})
+        
+    }
+}
+
+function randomIntFromInterval(min, max) { // min and max included 
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  }

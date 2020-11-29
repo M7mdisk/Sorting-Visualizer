@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import SortingVisualizer from './SortingVisualizer.jsx'
+import './style.css'
 export default class App extends Component{
     // eslint-disable-next-line
     constructor(){
@@ -8,9 +9,7 @@ export default class App extends Component{
     }
     render(){
         return(
-            <div>
                 <SortingVisualizer></SortingVisualizer>
-            </div>
         )
     }
 }
