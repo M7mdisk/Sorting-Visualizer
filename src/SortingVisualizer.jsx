@@ -1,16 +1,22 @@
 import React, {Component} from 'react'
 import Bar from "./Bar"
 import FlipMove from 'react-flip-move'
-const ARRAY_LENGTH =10;
-const SLEEP = 4000/ARRAY_LENGTH
+import Slider from 'react-input-slider';
+
+var ARRAY_LENGTH =10;
+var SLEEP = 1000
+
 export default class SortingVisualizer extends Component{
     constructor(){
         super()
         this.state = {
             array :[],
             curr:null,
+            sleep :5,
         };
+
     }
+
     componentDidMount(){
         this.resetArray();
     }
@@ -24,18 +30,40 @@ export default class SortingVisualizer extends Component{
         this.setState({array})
         this.setState({curr:null})
     }
+    
+    updateLength(x){
+        if (x === this.state.array.length)
+            return
+        this.setState({array:[]})
+        ARRAY_LENGTH = x; 
+        this.resetArray()
+        
+    }
+    updateSpeed(x){
+        this.setState({sleep:x})
+        let newsped = ((5/this.state.sleep)*100) 
+        SLEEP = newsped
+        console.log(SLEEP)    
+    }
 
     render(){
-        const {array,curr} = this.state 
+        const {array,curr,sleep} = this.state 
+        var duration = 10;
+        if (sleep > 200 || array.length > 60)
+            duration = 0 
         return(<div>
             <div className='navbar'>
 
                 <button onClick={() =>this.resetArray()}>Generate new array</button>
                 <button onClick={() => this.doBubbleSort(array)}>Bubble Sort</button>
                 <button onClick={() => this.doSelectionSort(array)}>Selection Sort</button>
+                <div style={{width:'25vw'}}>
+                <Slider styles={{margin:'10px'}} axis="x" x={ARRAY_LENGTH} xmin={5} xmax={100} onChange={({x}) => this.updateLength(x)}/>
+                <Slider axis="x" x={this.state.sleep} xmin={5} xmax={300} onChange={({x}) => this.updateSpeed(x)}/>
+                </div>
             </div>
                  <div className='container'>
-                     <FlipMove className='container' duration='100'>
+                     <FlipMove className='container' enterAnimation="none" leaveAnimation='none' duration={duration} >
 
                 {array.map((bar, idx) =>(
                     <Bar key={bar.id} height ={bar.value} active={curr === idx} state={bar.state}></Bar>
@@ -53,11 +81,7 @@ export default class SortingVisualizer extends Component{
     }
     swap(array,a,b)
     {
-    // ANIMATING SWAP
-    
-    //SWAPPING STATE ARRAY
     let temp = array[a]
-
     array[a] = array[b]
     array[b] = temp
     this.setState({array: array})
@@ -86,31 +110,29 @@ export default class SortingVisualizer extends Component{
         this.setBarState(0,'sorted')
     }
 
-    // async doSelectionSort(arr,states)
-    // {
-    //     let n = arr.length;
-    //     for(let i = 0; i < n; i++) {
-    //         let min = i;
-    //         this.setBarState(min,'compare')
-    //         await sleep(SLEEP)
-    //         for(let j = i+1; j < n; j++){
-    //             this.setState({curr:j})
-    //             this.setBarState(min,'compare')
-    //             await sleep(SLEEP)
-    //             if(arr[j] > arr[min]) {
-    //                     min=j; 
-    //             }
-    //          }
-    //          if (min != i) {
-    //              swap(arr,i,min)
-    //              swap(states,i,min)
-    //              this.setState({array: arr})
-    //              this.setBarState(i,'sorted')
-    //         }
-    //         this.setState({array: arr})
-    //     }
-    //     this.setState({array: arr})
-    // }
+    async doSelectionSort(arr)
+    {
+        let n = arr.length;
+        for(let i = 0; i < n; i++) {
+            let min = i;
+            this.setBarState(min,'compare')
+            await sleep(SLEEP)
+            for(let j = i+1; j < n; j++){
+                this.setState({curr:j})
+                await sleep(SLEEP)
+                if(arr[j].value > arr[min].value) {
+                    this.setBarState(min,'unsorted')
+                    min=j; 
+                    this.setBarState(min,'compare')
+                }
+             }
+             if (min !== i) {
+                 this.swap(arr,i,min)
+                 this.setBarState(i,'sorted')
+            }
+            this.setBarState(i,'sorted')
+        }
+    }
 
 }
 
@@ -122,4 +144,3 @@ function randomIntFromInterval(min, max) { // min and max included
 const sleep = (milliseconds) => {
   return new Promise(resolve => setTimeout(resolve, milliseconds))
 }
-
