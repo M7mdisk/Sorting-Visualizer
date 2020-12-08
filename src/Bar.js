@@ -8,7 +8,7 @@ export default class Bar extends Component{
         let className = "bar"
         if(this.props.active)
         {
-            className += " active"
+            className = "bar  active"
         }
         if(this.props.state === "sorted")
         {

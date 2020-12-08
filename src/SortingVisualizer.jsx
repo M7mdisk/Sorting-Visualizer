@@ -14,7 +14,6 @@ export default class SortingVisualizer extends Component{
             curr:null,
             sleep :5,
         };
-
     }
 
     componentDidMount(){
@@ -31,37 +30,37 @@ export default class SortingVisualizer extends Component{
         this.setState({curr:null})
     }
     
-    updateLength(x){
+    updateLengthAndSpeed(x){
         if (x === this.state.array.length)
             return
         this.setState({array:[]})
         ARRAY_LENGTH = x; 
         this.resetArray()
-        
-    }
-    updateSpeed(x){
         this.setState({sleep:x})
-        let newsped = ((5/this.state.sleep)*100) 
+        let newsped = (-1000/95)*(this.state.sleep-100) 
         SLEEP = newsped
-        console.log(SLEEP)    
+    }   
+    StopSorting(){
+        window.location.reload();
     }
 
     render(){
         const {array,curr,sleep} = this.state 
-        var duration = 10;
-        if (sleep > 200 || array.length > 60)
+        var duration = 100;
+        if (array.length > 60)
             duration = 0 
         return(<div>
-            <div className='navbar'>
-
-                <button onClick={() =>this.resetArray()}>Generate new array</button>
-                <button onClick={() => this.doBubbleSort(array)}>Bubble Sort</button>
-                <button onClick={() => this.doSelectionSort(array)}>Selection Sort</button>
-                <div style={{width:'25vw'}}>
-                <Slider styles={{margin:'10px'}} axis="x" x={ARRAY_LENGTH} xmin={5} xmax={100} onChange={({x}) => this.updateLength(x)}/>
-                <Slider axis="x" x={this.state.sleep} xmin={5} xmax={300} onChange={({x}) => this.updateSpeed(x)}/>
-                </div>
-            </div>
+            <ul>
+                <li><a  onClick={() => this.resetArray()}>Generate new array</a></li>
+                <li style={{ padding:'30px'}}>
+                    <p style={{color:'white'}}>change array speed & length</p>
+                <Slider className='slider' styles={{margin:'10px'}} axis="x" x={ARRAY_LENGTH} xmin={5} xmax={100} onChange={({x}) => this.updateLengthAndSpeed(x)}/>
+                </li>
+                <li><a onClick={() => this.doBubbleSort(array)}>Start Bubble Sort</a></li>
+                <li><a  onClick={() => this.doSelectionSort(array)}>Start Selection Sort</a></li>
+                <li><a  onClick={() => this.doSelectionSort(array)}>Start Insertion Sort</a></li>
+                <li style={{ borderRight:'none'}}><a  onClick={() => this.StopSorting()}>Restart Everything!</a></li>
+            </ul>
                  <div className='container'>
                      <FlipMove className='container' enterAnimation="none" leaveAnimation='none' duration={duration} >
 
@@ -89,6 +88,8 @@ export default class SortingVisualizer extends Component{
     
     async doBubbleSort(arr)
     {
+        this.setState({running:true})
+        while(this.state.running == true){
         var len = arr.length;
         for (var i = 0; i < len ; i++) {
           for(var j = 0 ; j < len - i - 1; j++){
@@ -108,6 +109,8 @@ export default class SortingVisualizer extends Component{
             this.setBarState(len-i-1,'sorted')
         }
         this.setBarState(0,'sorted')
+        this.setState({running:false})
+        }
     }
 
     async doSelectionSort(arr)
@@ -132,6 +135,27 @@ export default class SortingVisualizer extends Component{
             }
             this.setBarState(i,'sorted')
         }
+    }
+
+    async doInsertionSort(arr){
+        for (let i = 1; i < arr.length; i++) {
+            let j = i - 1
+            this.setState({curr:j})
+            this.setBarState(j,'sorted')
+            await sleep(SLEEP)
+            let temp = arr[i]
+            this.setBarState(i,'compare')
+            await sleep(SLEEP)
+            this.setBarState(i,'sorted')
+            while (j >= 0 && arr[j].value < temp.value) {
+              arr[j + 1] = arr[j]
+              j--
+            }
+            arr[j+1] = temp
+            this.setBarState(j+1,'compare')
+            this.setBarState(j+1,'sorted')
+          }
+        this.setState({array:arr});
     }
 
 }
